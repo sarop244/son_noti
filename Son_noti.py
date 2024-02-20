@@ -1,39 +1,28 @@
 import discord
-import asyncio  # 슬립 사용을위한
 
-TOKEN = 'MTIwOTEwNDU5MzU5OTA3MDI0OQ.GI1hC9.HYrBTOhpJ5sA5Y4mmErjo7ovAb3BWDwHk3DV8s'
-CHANNEL_ID = 1209141953002733618   # 광태 공습경보
-USER_ID = 295482295467376650  # 광태 아이디
-SERVER_ID = 387940168159723540 # 서버 아이디
+TOKEN = 'MTIwOTEwNDU5MzU5OTA3MDI0OQ.GRZnUf.YCLdwVZz7Po_e1oz_E8Ac0MQJr2zaV82hMcC6Y'
+CHANNEL_ID = 1209141953002733618                        # 광태 공습경보
+USER_ID = 295482295467376650                            # 광태 아이디
+SERVER_ID = 387940168159723540                          # 서버 아이디
 
 intents = discord.Intents.all()
-intents.presences = True  # Presence Intent 활성화
+intents.presences = True                                # Presence Intent 활성화
+
 class MyClient(discord.Client):
     async def on_ready(self):
         print('로그인')
-        while True:
-            await self.check_member_status()
-            await asyncio.sleep(5)  # 5초마다 상태 확인
 
-    async def check_member_status(self):
-        print('첫번째 단계')  # 이 부분이 호출되지 않는 문제를 확인하기 위해 추가
-        guild = self.get_guild(SERVER_ID)
+    async def on_presence_update(self, before, after):  # 상태창 변경될때마다 실행
+        guild = self.get_guild(SERVER_ID)               # 길드
+        User = guild.get_member(USER_ID)                # 길드 겟멤버를 해야 status 를 사용할수있음
+        print(User,before)
+        if before == User:                              # 바뀜을 감지한 유저와 '광태'가 같은 사람인지 확인
 
-        if guild:
-            member = guild.get_member(USER_ID)
-            if member:
-                if member.status != discord.Status.online:
-                    channel = self.get_channel(CHANNEL_ID)
-                    if channel:
-                        await channel.send('광태 감지')
+            if User.status == discord.Status.online:    # 메시지를 보낼 채널을 찾음
+                channel = self.get_channel(CHANNEL_ID)
+                if channel:                             # 메시지를 보냄
+                    await channel.send('광태 감지')
 
-        # guild = self.get_guild(SERVER_ID)
-        # User = guild.get_member(USER_ID)
-
-        # if User.status != discord.Status.online:
-        #     channel = self.get_channel(CHANNEL_ID)
-        #     if channel:
-        #         await channel.send('광태 감지')
 
 client = MyClient(intents=intents)
 client.run(TOKEN)
